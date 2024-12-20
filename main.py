@@ -47,7 +47,7 @@ def parse(html):
 def convert_time(hhmm):
     return int(hhmm.split(':')[0]) * 60 + int(hhmm.split(':')[1])
 
-def afk_search(time_range, ot, to, date):
+async def afk_search(time_range, ot, to, date, cooldown):
     logging.debug(f'{ot}/{to}/{date} - {time_range}')
     logging.info('start afk')
     time_min = convert_time(time_range[0])
@@ -55,15 +55,16 @@ def afk_search(time_range, ot, to, date):
     while True:
         time_list = parse(web_search(ot, to, date))
         logging.warning(time_list)
-        time.sleep(10)
         bus_list = map(lambda t: convert_time(t.group()) if time_min <= convert_time(t.group()) <= time_max else None, time_list)
         bus_list = filter(lambda b: b is not None, bus_list)
         resp = [f'{res // 60}:{res % 60 if res % 60 != 0 else '00'}' for res in bus_list]
         if resp:
-            return
+            return resp
         else:
             logging.warning(resp)
 
-print(afk_search(['10:00', '10:10'], ot="Минск", to="Слуцк", date="2024-12-20"))
+        time.sleep(int(cooldown))
+
+# print(afk_search(['10:00', '10:10'], ot="Минск", to="Слуцк", date="2024-12-20", cooldown=30))
 
 
